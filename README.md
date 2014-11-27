@@ -11,10 +11,10 @@ With this Library you can add Mobile Analytics from Stetic to your iOS app.
 #import "Stetic.h"
 ```
 
-3. Initialize the library with your site token when the app loads. Typically in `AppDelegate.m` `didFinishLaunchingWithOptions`;
+3. Initialize the library with your site token when the app loads. Typically in `AppDelegate.m` `didFinishLaunchingWithOptions`:
 
 ```objective-c
-    [Stetic sharedInstance].token = @"XXXX-XXXXXXXXXXXX-XXXXXXXX";
+[Stetic sharedInstance].token = @"XXXX-XXXXXXXXXXXX-XXXXXXXX";
 ```
 
 Replace XXXX-XXXXXXXXXXXX-XXXXXXXX with your site token.
@@ -24,25 +24,25 @@ Replace XXXX-XXXXXXXXXXXX-XXXXXXXX with your site token.
 To track an event when your app opens, add the following line after the line specified above:
 
 ```objective-c
-    [[Stetic sharedInstance] track:@"appopen"];
+[[Stetic sharedInstance] track:@"appopen"];
 ```
 
 Track a view:
 
 ```objective-c
-    [[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"Dashboard"}];
+[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"Dashboard"}];
 ```
 
 You can add any properties you like:
 
 ```objective-c
-    [[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"Dashboard", @"property": @"value"}];
+[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"Dashboard", @"property": @"value"}];
 ```
 
 5. Identify users:
 
 
 ```objective-c
-    [[Stetic sharedInstance].visitor addProperty:@"id" value: user.id];
-    [[Stetic sharedInstance].visitor addProperty:@"email" value: user.email];
+[[Stetic sharedInstance].visitor addProperty:@"id" value: user.id]; // With the user id 
+[[Stetic sharedInstance].visitor addProperty:@"email" value: user.email]; // With the user email
 ```
