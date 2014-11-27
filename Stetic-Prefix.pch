@@ -1,0 +1,10 @@
+//
+//  Stetic iOS
+//  iOS tracking library for Stetic Mobile Analytics
+//
+//  Copyright (c) 2014 Stetic (http://www.stetic.com/)
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+#endif
