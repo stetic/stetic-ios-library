@@ -14,8 +14,8 @@
 @property (nonatomic, copy) NSString *uuid;
 
 
-- (void)addProperty:(NSString*)key value:(NSString*)value;
-- (void)addProperties:(NSDictionary*)properties;
+- (void)identify:(NSString*)key value:(NSString*)value;
+- (void)identify:(NSDictionary*)properties;
 - (NSString*)getSessionId;
 - (NSString*)getUuid;
 

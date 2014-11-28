@@ -36,7 +36,7 @@
     return self;
 }
 
-- (void)addProperty:(NSString *)key value:(NSString *)value
+- (void)identify:(NSString *)key value:(NSString *)value
 {
     if (key && value)
     {
@@ -44,7 +44,7 @@
     }
 }
 
-- (void)addProperties:(NSDictionary *)props
+- (void)identify:(NSDictionary *)props
 {
     if (props)
     {
