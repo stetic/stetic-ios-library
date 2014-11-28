@@ -201,7 +201,7 @@ static Stetic* gSingleton = nil;
                                    self.token, self.sessionId, self.uuid, event, (long)((NSInteger)size.width), (long)((NSInteger)size.height), deviceModel];
 
     // Add identify properties
-	NSDictionary* prop = self.userProperties;
+    NSDictionary* prop = self.userProperties;
 	for (NSString* k in prop)
     {
         [parameters appendFormat:@"&ucm[%@]=%@", k, prop[k]];
