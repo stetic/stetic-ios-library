@@ -43,5 +43,5 @@ With this iOS Tracking Library you can track users on your iPhone or iPad applic
 
 	```objective-c
 	[[Stetic sharedInstance].visitor identify:@"id" value: user.id]; // Key value 
-	[[Stetic sharedInstance].visitor identify:{@"id" value: user.id, "email" value: user.email, "name" value: user.name}]; // NSDictionary
+	[[Stetic sharedInstance].visitor identify:{@"id": user.id, "email": user.email, "name": user.name}]; // NSDictionary
 	```
