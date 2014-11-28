@@ -30,18 +30,20 @@ With this iOS Tracking Library you can track users on your iPhone or iPad applic
 	Track a view:
 
 	```objective-c
-	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"Dashboard"}];
+	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"MyView"}];
 	```
 
 	You can add any properties you like:
 
 	```objective-c
-	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"Dashboard", @"property": @"value"}];
+	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"MyView", @"property": @"value"}];
 	```
 
-5. Identify users:
+5. Identify users. Call the identify method BEFORE the track method:
 
 	```objective-c
-	[[Stetic sharedInstance].visitor identify:@"id" value: user.id]; // Key value 
-	[[Stetic sharedInstance].visitor identify:{@"id": user.id, @"email": user.email, @"name": user.name}]; // NSDictionary
+	[[Stetic sharedInstance] identify:@"id" value: user.id]; // Key value 
+	[[Stetic sharedInstance] identify:@{@"id": user.id, @"email": user.email, @"name": user.name}]; // NSDictionary
+	
+	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"MyView"}];
 	```

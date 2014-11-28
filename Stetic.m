@@ -18,9 +18,16 @@
 
 #import "Stetic.h"
 
+@interface Stetic()
+
+@property (nonatomic, strong) NSMutableDictionary *userProperties;
+@property (nonatomic, strong) NSTimer *timer;
+
+@end
+
 @implementation Stetic
 
-@synthesize token, visitor;
+@synthesize token, uuid, userProperties, timer;
 
 static Stetic* gSingleton = nil;
 
@@ -29,7 +36,6 @@ static Stetic* gSingleton = nil;
 	if (nil == gSingleton)
 	{
 		gSingleton = [[Stetic alloc] init];
-		gSingleton.visitor = [[SteticVisitor alloc] init];
 	}
     
 	return gSingleton;
@@ -40,15 +46,78 @@ static Stetic* gSingleton = nil;
 	self = [super init];
 	if (!self) return nil;
     
+    if (self)
+    {
+        NSString* unique_user_id = [[NSUserDefaults standardUserDefaults] stringForKey:@"stetic_uuid"];
+        if (nil == unique_user_id || NULL == unique_user_id || [unique_user_id length] == 0)
+        {
+            unique_user_id = [self getUuid];
+            [[NSUserDefaults standardUserDefaults] setObject:unique_user_id forKey:@"stetic_uuid"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
+        self.uuid = unique_user_id;
+        self.userProperties = [NSMutableDictionary dictionary];
+    }
+    
 	return self;
 }
 
 - (void)dealloc
 {
 	self.token = nil;
-	self.visitor = nil;
+    self.uuid = nil;
+    self.userProperties = nil;
+    
+    [timer invalidate];
     
 	[super dealloc];
+}
+
+- (NSString*) getSessionId
+{
+    NSString *chars = @"abcdefghijklmnopqrstuvwxyz0123456789";
+    NSMutableString *sessionId = [NSMutableString stringWithCapacity: 32];
+    
+    for (int i=0; i<32; i++) {
+        [sessionId appendFormat: @"%C", [chars characterAtIndex: arc4random() % [chars length]]];
+    }
+    return sessionId;
+    
+}
+
+- (NSString*)getUuid
+{
+	int counter = rand() & 0xffffff;
+    NSUUID *udid = [[UIDevice currentDevice] identifierForVendor];
+    unsigned char data[16];
+    
+    [udid getUUIDBytes:data];
+    int d = 0xffffff;
+    for(int i = 0; i < 16; i += 3) {
+        int x = data[i%16] + (data[(i+1) % 16] << 8) + (data[(i + 2) % 16] << 16);
+        d = (d ^ x) & 0xffffff;
+    }
+    int mid = d;
+    
+    UInt16 pid = getpid();
+    UInt8 pidHigh = pid >> 8;
+    UInt8 pidLow = pid & 0xff;
+    
+    counter++;
+    if (counter >= 0xffffff) {
+        counter = 0;
+    }
+    
+    typedef struct {
+        UInt32 m[3];
+    } ObjectID;
+    
+    ObjectID _id;
+    _id.m[2] = (UInt32)time(0);
+    _id.m[1] = pidLow + (mid << 8);
+    _id.m[0] = counter + (pidHigh << 24);
+    
+    return [NSString stringWithFormat:@"%08x%08x%08x", (unsigned int)_id.m[2], (unsigned int)_id.m[1], (unsigned int)_id.m[0]];
 }
 
 - (void)resetSession
@@ -81,12 +150,6 @@ static Stetic* gSingleton = nil;
         return;
 	}
     
-	if (nil == self.visitor)
-	{
-        NSLog(@"Stetic.visitor not set.");
-        return;
-	}
-    
     if (event == nil || [event length] == 0)
     {
         NSLog(@"Stetic: empty event given.");
@@ -102,7 +165,7 @@ static Stetic* gSingleton = nil;
     if (nil == sessionId || NULL == sessionId || [sessionId length] == 0 ||
         [sessionLastAccess compare:sessionExpired] == NSOrderedAscending)
     {
-        sessionId = [self.visitor getSessionId];
+        sessionId = [self getSessionId];
         [[NSUserDefaults standardUserDefaults] setObject:sessionId forKey:@"stetic_sid"];
     }
     
@@ -135,26 +198,84 @@ static Stetic* gSingleton = nil;
     
     
 	NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&e=%@&sw=%ld&sh=%ld&os=iOS&lib=ios&device=%@",
-                                   self.token, self.sessionId, self.visitor.uuid, event, (long)((NSInteger)size.width), (long)((NSInteger)size.height), deviceModel];
+                                   self.token, self.sessionId, self.uuid, event, (long)((NSInteger)size.width), (long)((NSInteger)size.height), deviceModel];
 
-    // Add visitors properties
-	NSDictionary* prop = self.visitor.properties;
+    // Add identify properties
+	NSDictionary* prop = self.userProperties;
 	for (NSString* k in prop)
     {
         [parameters appendFormat:@"&ucm[%@]=%@", k, prop[k]];
     }
     
-	// Add Event Properties
-	for (NSString* k in event_properties)
+    // Add Event Properties
+    for (NSString* k in event_properties)
     {
         [parameters appendFormat:@"&ctm[%@]=%@", k, event_properties[k]];
     }
+
+    int timestamp = [[NSDate date] timeIntervalSince1970];
+    [parameters appendFormat:@"&r=%d", timestamp];
     
     NSString *url = [trackingEndpoint stringByAppendingString:parameters];
     
     //NSLog(@"Stetic tracking request: %@", url);
     
 	// Tracking request
+	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:
+                                    [NSURL URLWithString: [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
+    
+    
+	[NSURLConnection connectionWithRequest:request delegate:self];
+    
+    // (Re)start ping timer
+    [timer invalidate];
+    timer = nil;
+    
+    timer = [NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(pinger) userInfo:nil repeats:YES];
+}
+
+- (void)identify:(NSString *)key value:(NSString *)value
+{
+    if (key && value)
+    {
+        [self.userProperties setObject: [value copy] forKey:key];
+    }
+}
+
+- (void)identify:(NSDictionary *)properties
+{
+    if (properties)
+    {
+        [self.userProperties addEntriesFromDictionary:properties];
+    }
+}
+
+-(void)pinger
+{
+    // Only ping when app is active
+    if( [[UIApplication sharedApplication] applicationState] != UIApplicationStateActive )
+    {
+        return;
+    }
+    
+	NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&lib=ios",
+                                   self.token, self.sessionId, self.uuid];
+
+    // Add identify properties
+	NSDictionary* prop = self.userProperties;
+	for (NSString* k in prop)
+    {
+        [parameters appendFormat:@"&ctm[%@]=%@", k, prop[k]];
+    }
+    
+    int timestamp = [[NSDate date] timeIntervalSince1970];
+    [parameters appendFormat:@"&r=%d", timestamp];
+    
+    NSString *url = [pingEndpoint stringByAppendingString:parameters];
+    
+    //NSLog(@"Stetic PING request: %@", url);
+    
+	// Ping request
 	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:
                                     [NSURL URLWithString: [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
     
