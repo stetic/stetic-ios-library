@@ -43,8 +43,8 @@ static Stetic* gSingleton = nil;
 
 - (instancetype)init
 {
-	self = [super init];
-	if (!self) return nil;
+    self = [super init];
+    if (!self) return nil;
     
     if (self)
     {
@@ -59,18 +59,18 @@ static Stetic* gSingleton = nil;
         self.userProperties = [NSMutableDictionary dictionary];
     }
     
-	return self;
+    return self;
 }
 
 - (void)dealloc
 {
-	self.token = nil;
+    self.token = nil;
     self.uuid = nil;
     self.userProperties = nil;
     
     [timer invalidate];
     
-	[super dealloc];
+    [super dealloc];
 }
 
 - (NSString*) getSessionId
@@ -87,7 +87,7 @@ static Stetic* gSingleton = nil;
 
 - (NSString*)getUuid
 {
-	int counter = rand() & 0xffffff;
+    int counter = rand() & 0xffffff;
     NSUUID *udid = [[UIDevice currentDevice] identifierForVendor];
     unsigned char data[16];
     
@@ -143,13 +143,13 @@ static Stetic* gSingleton = nil;
 
 - (void)track:(NSString *)event properties:(NSDictionary *)properties
 {
-	// check parameters
-	if (nil == self.token)
-	{
+    // check parameters
+    if (nil == self.token)
+    {
         NSLog(@"Stetic.token not set.");
         return;
-	}
-    
+    }
+
     if (event == nil || [event length] == 0)
     {
         NSLog(@"Stetic: empty event given.");
@@ -197,7 +197,7 @@ static Stetic* gSingleton = nil;
     [event_properties setValue: carrier.carrierName forKey: @"carrier"];
     
     
-	NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&e=%@&sw=%ld&sh=%ld&os=iOS&lib=ios&device=%@",
+    NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&e=%@&sw=%ld&sh=%ld&os=iOS&lib=ios&device=%@",
                                    self.token, self.sessionId, self.uuid, event, (long)((NSInteger)size.width), (long)((NSInteger)size.height), deviceModel];
 
     // Add identify properties
@@ -219,13 +219,14 @@ static Stetic* gSingleton = nil;
     NSString *url = [trackingEndpoint stringByAppendingString:parameters];
     
     //NSLog(@"Stetic tracking request: %@", url);
-    
-	// Tracking request
-	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:
-                                    [NSURL URLWithString: [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
-    
-    
-	[NSURLConnection connectionWithRequest:request delegate:self];
+
+    // Tracking request
+    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:
+                                    [NSURL URLWithString: [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestReloadIgnoringCacheData
+                                        timeoutInterval:60.0];
+
+
+    [NSURLConnection connectionWithRequest:request delegate:self];
     
     // (Re)start ping timer
     [timer invalidate];
@@ -257,13 +258,13 @@ static Stetic* gSingleton = nil;
     {
         return;
     }
-    
-	NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&lib=ios",
+
+    NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&lib=ios",
                                    self.token, self.sessionId, self.uuid];
 
     // Add identify properties
     NSDictionary* prop = self.userProperties;
-	for (NSString* k in prop)
+    for (NSString* k in prop)
     {
         [parameters appendFormat:@"&ctm[%@]=%@", k, prop[k]];
     }
