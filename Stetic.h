@@ -30,6 +30,6 @@
 - (void)track:(NSString *)event properties:(NSDictionary *)properties;
 - (void)identify:(NSString*)key value:(NSString*)value;
 - (void)identify:(NSDictionary*)properties;
-- (void)pinger:(NSTimer*)timer;
+- (void)pinger;
     
 @end
