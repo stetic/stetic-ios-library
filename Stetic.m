@@ -33,12 +33,12 @@ static Stetic* gSingleton = nil;
 
 + (Stetic*)sharedInstance
 {
-	if (nil == gSingleton)
-	{
-		gSingleton = [[Stetic alloc] init];
-	}
-    
-	return gSingleton;
+    if (nil == gSingleton)
+    {
+        gSingleton = [[Stetic alloc] init];
+    }
+
+    return gSingleton;
 }
 
 - (instancetype)init
@@ -262,7 +262,7 @@ static Stetic* gSingleton = nil;
                                    self.token, self.sessionId, self.uuid];
 
     // Add identify properties
-	NSDictionary* prop = self.userProperties;
+    NSDictionary* prop = self.userProperties;
 	for (NSString* k in prop)
     {
         [parameters appendFormat:@"&ctm[%@]=%@", k, prop[k]];
@@ -275,12 +275,12 @@ static Stetic* gSingleton = nil;
     
     //NSLog(@"Stetic PING request: %@", url);
     
-	// Ping request
-	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:
+    // Ping request
+    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:
                                     [NSURL URLWithString: [url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0];
-    
-    
-	[NSURLConnection connectionWithRequest:request delegate:self];
+
+
+    [NSURLConnection connectionWithRequest:request delegate:self];
     
 }
 
