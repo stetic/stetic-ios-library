@@ -25,6 +25,7 @@
 
 - (NSString*)getSessionId;
 - (NSString*)getUuid;
+- (void)startSession:(NSString *)siteToken;
 - (void)resetSession;
 - (void)track:(NSString *)event;
 - (void)track:(NSString *)event properties:(NSDictionary *)properties;

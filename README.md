@@ -4,39 +4,49 @@ With this iOS Tracking Library you can track users on your iPhone or iPad applic
  
 ## Documentation
 
-1. Add the files from this repository to your iOS project.
-2. Import the Stetic Header file:
+1. Add the files from this repository to your iOS project. If you're using XCode, just drag and drop the files to your XCode Project Workspace.
+2. Import the Stetic Header file in your Application Delegate (AppDelegate.m):
 
 	```objective-c
 	#import "Stetic.h"
 	```
 
-3. Initialize the library with your site token when the app loads. Typically in `AppDelegate.m` `didFinishLaunchingWithOptions`:
+3. Initialize the library with the startSession method in your Application Delegate inside didFinishLaunchingWithOptions:
 
 	```objective-c
-	[Stetic sharedInstance].token = @"XXXX-XXXXXXXXXXXX-XXXXXXXX";
+    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+      [[Stetic sharedInstance] startSession:@"YOUR_SITE_TOKEN"];
+    }
 	```
 
-	Replace XXXX-XXXXXXXXXXXX-XXXXXXXX with your site token.
+	Replace YOUR_SITE_TOKEN with your site token.
 
 4. Start tracking events in your app. 
 
-	To track an event when your app opens, add the following line after the line specified above:
+	The best way is to track an event in every view inside viewDidLoad.
+    Hint: Use the appview event here to use our pre-configured events.
 
 	```objective-c
-	[[Stetic sharedInstance] track:@"appopen"];
+    - (void)viewDidLoad
+    {
+        [super viewDidLoad];
+
+        [[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"MyView"}];
+    }
 	```
 
-	Track a view:
-
-	```objective-c
-	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"MyView"}];
-	```
-
-	You can add any properties you like:
+	You can add more properties for better segmentation:
 
 	```objective-c
 	[[Stetic sharedInstance] track:@"appview" properties:@{@"view": @"MyView", @"property": @"value"}];
+	```
+
+    Track any event you like:
+
+
+	```objective-c
+	[[Stetic sharedInstance] track:@"video play" properties:@{@"title": @"My awesome video", @"author": @"Jimmy Schmidt"}];
 	```
 
 5. Identify users. Call the identify method BEFORE the track method:

@@ -120,6 +120,13 @@ static Stetic* gSingleton = nil;
     return [NSString stringWithFormat:@"%08x%08x%08x", (unsigned int)_id.m[2], (unsigned int)_id.m[1], (unsigned int)_id.m[0]];
 }
 
+- (void)startSession:(NSString *)siteToken
+{
+    self.token = siteToken;
+    [self track:@"appopen"];
+}
+
+
 - (void)resetSession
 {
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"stetic_sid"];
@@ -160,6 +167,7 @@ static Stetic* gSingleton = nil;
     
     NSString* sessionId = [[NSUserDefaults standardUserDefaults] stringForKey:@"stetic_sid"];
     NSDate* sessionLastAccess = [[NSUserDefaults standardUserDefaults] objectForKey:@"stetic_last"];
+    NSInteger sessionCount = [[NSUserDefaults standardUserDefaults] integerForKey:@"stetic_count"];
     NSDate *sessionExpired = [[[NSDate alloc] initWithTimeIntervalSinceNow:-(3600*2)] autorelease];
 
     if (nil == sessionId || NULL == sessionId || [sessionId length] == 0 ||
@@ -167,6 +175,8 @@ static Stetic* gSingleton = nil;
     {
         sessionId = [self getSessionId];
         [[NSUserDefaults standardUserDefaults] setObject:sessionId forKey:@"stetic_sid"];
+        sessionCount++;
+        [[NSUserDefaults standardUserDefaults] setInteger:sessionCount forKey:@"stetic_count"];
     }
     
     NSDate *now = [[NSDate alloc] init];
@@ -196,9 +206,10 @@ static Stetic* gSingleton = nil;
     [event_properties setValue: deviceModel forKey: @"device_model"];
     [event_properties setValue: carrier.carrierName forKey: @"carrier"];
     
+    int lv = [sessionLastAccess timeIntervalSince1970];
     
-    NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&e=%@&sw=%ld&sh=%ld&os=iOS&lib=ios&device=%@",
-                                   self.token, self.sessionId, self.uuid, event, (long)((NSInteger)size.width), (long)((NSInteger)size.height), deviceModel];
+    NSMutableString* parameters = [NSMutableString stringWithFormat:@"?id=%@&s=%@&u=%@&e=%@&lv=%ld&vc=%ld&sw=%ld&sh=%ld&os=iOS&lib=ios&device=%@",
+                                   self.token, self.sessionId, self.uuid, event, (long)lv, (long)sessionCount, (long)((NSInteger)size.width), (long)((NSInteger)size.height), deviceModel];
 
     // Add identify properties
     NSDictionary* prop = self.userProperties;
