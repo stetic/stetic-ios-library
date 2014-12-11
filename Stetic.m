@@ -54,6 +54,11 @@ static Stetic* gSingleton = nil;
             unique_user_id = [self getUuid];
             [[NSUserDefaults standardUserDefaults] setObject:unique_user_id forKey:@"stetic_uuid"];
             [[NSUserDefaults standardUserDefaults] synchronize];
+            self.fresh_install = YES;
+        }
+        else
+        {
+            self.fresh_install = NO;
         }
         self.uuid = unique_user_id;
         self.userProperties = [NSMutableDictionary dictionary];
@@ -123,6 +128,11 @@ static Stetic* gSingleton = nil;
 - (void)startSession:(NSString *)siteToken
 {
     self.token = siteToken;
+    
+    if(self.fresh_install == YES)
+    {
+        [self track:@"appinstall"];
+    }
     [self track:@"appopen"];
 }
 

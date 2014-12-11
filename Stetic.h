@@ -17,6 +17,7 @@
 @property (nonatomic, copy) NSString* token;
 @property (nonatomic, copy) NSString* sessionId;
 @property (nonatomic, copy) NSString *uuid;
+@property (nonatomic) BOOL fresh_install;
 @property (nonatomic, readonly, strong) NSMutableDictionary *userProperties;
 @property (nonatomic, readonly, strong) NSTimer *timer;
 @property (NS_NONATOMIC_IOSONLY, readonly, copy) NSString *deviceModel;
